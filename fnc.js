@@ -1,21 +1,23 @@
-import parseFn from 'https://esm.sh/parse-function'
-const parseFn = require('parse-function');
-const app = parseFn();
+import parseFn from 'https://cdn.skypack.dev/parse-function';
 
 addEventListener("fetch", (event) => {
-  const fn = `
-    (x, y) => {
-      throw 123;
-    }
-  `;
+  
+  const app = parseFn();
 
-  const nonFn = 'const f = {}'
+  const fn = '(x, y) => x + y';
 
-  const evil = 'throw new Error(123)'
+  const nonFn = 'const f = {}';
+
+  const evil = 'throw new Error(123)';
 
   const evalFn = eval(fn);
 
-  const resp = new Response("Hello2", {
+  const queryArgs = [2, 3, 4];
+  // console.log(evalFn.apply(null, queryArgs));
+
+  const result = evalFn.apply(null, queryArgs);
+
+  const resp = new Response(result, {
     headers: { "content-type": "text/plain" },
   });
 
@@ -31,9 +33,6 @@ addEventListener("fetch", (event) => {
   //     console.log('');
   //     Deno.exit(1);
   //   }
-
-  //   const queryArgs = [2, 3, 4];
-  //   console.log(evalFn.apply(null, queryArgs));
 
   // } catch (e) {
   //   console.log({ err: e.message || e });
