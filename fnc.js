@@ -1,37 +1,44 @@
 import parseFn from 'https://esm.sh/parse-function'
-// const parseFn = require('parse-function');
+const parseFn = require('parse-function');
 const app = parseFn();
 
-const fn = `
-(x, y) => {
-    throw 123;
-}
-`;
+addEventListener("fetch", (event) => {
+  const fn = `
+    (x, y) => {
+      throw 123;
+    }
+  `;
 
-const nonFn = 'const f = {}'
+  const nonFn = 'const f = {}'
 
-const evil = 'throw new Error(123)'
+  const evil = 'throw new Error(123)'
 
-const evalFn = eval(fn);
+  const evalFn = eval(fn);
 
-// console.log(evalFn(2, 3));
-
-try {
-  const result = app.parse(evalFn, {
-    ecmaVersion: 2017,
-    throwExpressions: true,
+  const resp = new Response("Hello2", {
+    headers: { "content-type": "text/plain" },
   });
 
-  if (result.body === '') {
-    console.log('');
-    Deno.exit(1);
-  }
+  // console.log(evalFn(2, 3));
 
-  const queryArgs = [2, 3, 4];
-  console.log(evalFn.apply(null, queryArgs));
+  // try {
+  //   const result = app.parse(evalFn, {
+  //     ecmaVersion: 2017,
+  //     throwExpressions: true,
+  //   });
 
-} catch (e) {
-  console.log({ err: e.message || e });
-  Deno.exit(1);
-}
+  //   if (result.body === '') {
+  //     console.log('');
+  //     Deno.exit(1);
+  //   }
 
+  //   const queryArgs = [2, 3, 4];
+  //   console.log(evalFn.apply(null, queryArgs));
+
+  // } catch (e) {
+  //   console.log({ err: e.message || e });
+  //   Deno.exit(1);
+  // }
+
+  event.respondWith(resp);
+});
