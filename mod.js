@@ -5,8 +5,6 @@ addEventListener("fetch", (event) => {
   const app = parseFn();
   
   const fn = '(x, y) => x + y';
-  
-  const evalFn = eval(fn);
 
   const resp = new Response("Hello", {
     headers: { "content-type": "text/plain" },
