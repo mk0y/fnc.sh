@@ -6,7 +6,7 @@ addEventListener("fetch", (event) => {
   
   const fn = '(x, y) => x + y';
 
-  const resp = new Response("Hello", {
+  const resp = new Response("Hello2", {
     headers: { "content-type": "text/plain" },
   });
 
