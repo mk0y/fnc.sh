@@ -1,24 +1,55 @@
-import parseFn from 'https://cdn.skypack.dev/parse-function';
+import {
+  Bson,
+  MongoClient,
+} from "https://deno.land/x/mongo@0.28.0/mod.ts";
+let cachedDb = null;
+const databaseName = 'test'; //process.env.DB_NAME;
+const colName = 'fnc'; //process.env.COLLECTION;
+const dburi = 'mongodb://nodb:7EB4o55d2Ze6CmxmaJRv6m7WTVpH60BC6LTr7Z8U0XQgIuZKmIqTuyGsvcqNRpv4VnRwt14meAYckOKTwH3XWg==@nodb.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@nodb@';
 
-addEventListener("fetch", (event) => {
-  
-  const app = parseFn();
-  
-  const fn = '(x, y) => x + y';
+function connectToDatabase() {
+    if (cachedDb) {
+        return Promise.resolve(cachedDb);
+    }
 
-  // const func = new Function('x', 'y', 'return x + y;');
+    return MongoClient.connect(
+        dburi,
+        {   ssl: true  }
+    ).then(db => {
+        cachedDb = db;
+        return cachedDb;
+    });
+}
 
-  // func.bind(null, [2, 3]);
+function write (collection,_id,value){
 
-  //console.log(func.toString());
+    const filter = {_id};
 
-  //const res = func(1, 2);
+    const updateDoc = {
+        $set: {
+            _id,
+            value
+        },
+    };
 
-  //console.log(res);
+    const options = {"upsert" : true, "fullResult" : true};
 
-  const resp = new Response("Hello", {
-    headers: { "content-type": "text/plain" },
-  });
+    return collection.updateOne(filter, updateDoc, options);
+}
 
-  event.respondWith(resp);
-});
+exports.handler = async (event) => {
+    const client = await connectToDatabase();
+    const db = client.db(databaseName);
+    const collection = db.collection(colName);
+
+    const doc = (await write(collection, event._id, event.value));
+    const response = {
+        statusCode: 200,
+        body: {
+            'region' : 'test',
+            'operation' : 'write cosmos db',
+            doc
+        },
+    };
+    return response;
+};
